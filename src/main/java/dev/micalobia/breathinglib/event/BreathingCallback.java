@@ -20,7 +20,7 @@ public interface BreathingCallback {
 					if(result.getResult() != ActionResult.PASS) return result;
 				}
 				return TypedActionResult.consume(Optional.empty());
-			}, Event.DEFAULT_PHASE, VANILLA_PHASE);
+			}, VANILLA_PHASE, Event.DEFAULT_PHASE);
 
 	TypedActionResult<Optional<BreathingInfo>> apply(LivingEntity entity);
 }
