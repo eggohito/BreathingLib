@@ -2,9 +2,9 @@ package dev.micalobia.breathinglib;
 
 import com.google.common.base.Objects;
 import dev.micalobia.breathinglib.data.BreathingInfo;
-import net.fabricmc.api.ModInitializer;
 import dev.micalobia.breathinglib.event.BreathingCallback;
 import dev.micalobia.breathinglib.mixin.LivingEntityAccessor;
+import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectUtil;
