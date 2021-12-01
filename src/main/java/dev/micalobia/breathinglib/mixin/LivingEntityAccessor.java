@@ -1,4 +1,4 @@
-package net.fabricmc.example.mixin;
+package dev.micalobia.breathinglib.mixin;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;

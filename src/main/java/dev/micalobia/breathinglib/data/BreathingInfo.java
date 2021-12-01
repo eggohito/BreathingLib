@@ -1,4 +1,4 @@
-package net.fabricmc.example.data;
+package dev.micalobia.breathinglib.data;
 
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.particle.ParticleEffect;

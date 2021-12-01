@@ -1,7 +1,7 @@
-package net.fabricmc.example.mixin;
+package dev.micalobia.breathinglib.mixin;
 
-import net.fabricmc.example.data.BreathingInfo;
-import net.fabricmc.example.event.BreathingCallback;
+import dev.micalobia.breathinglib.data.BreathingInfo;
+import dev.micalobia.breathinglib.event.BreathingCallback;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;

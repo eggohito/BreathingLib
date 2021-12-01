@@ -1,10 +1,10 @@
-package net.fabricmc.example;
+package dev.micalobia.breathinglib;
 
 import com.google.common.base.Objects;
+import dev.micalobia.breathinglib.data.BreathingInfo;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.example.data.BreathingInfo;
-import net.fabricmc.example.event.BreathingCallback;
-import net.fabricmc.example.mixin.LivingEntityAccessor;
+import dev.micalobia.breathinglib.event.BreathingCallback;
+import dev.micalobia.breathinglib.mixin.LivingEntityAccessor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectUtil;

@@ -1,9 +1,12 @@
-# Fabric Example Mod
+# Breathing Library
+
+Breathing library is a mod that adds a hook that enabled you to change or modify vanilla breathing/drowning behaviour.
+This is useful for things such as adding the ability to drown in lava, breathing in water and drowning in air, and much more!
 
 ## Setup
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
+WIP
 
 ## License
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+This mod is available under the [GNU Lesser General Public License v3.0 or later](https://spdx.org/licenses/LGPL-3.0-or-later.html) license

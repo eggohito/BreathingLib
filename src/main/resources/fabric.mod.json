@@ -1,31 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "breathinglib",
   "version": "${version}",
-
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Breathing Library",
+  "description": "Adds a hook to modify or build upon Minecraft's breathing/drowning mechanic",
   "authors": [
-    "Me!"
+    "Micalobia"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://micalobia.dev/",
+    "sources": "https://micalobia.dev/minecraft/breathinglib"
   },
-
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
-
+  "license": "LGPL-3.0-or-later",
+  "icon": "assets/breathinglib/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.BreathingLib"
+      "dev.micalobia.breathinglib.BreathingLib"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "breathinglib.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
@@ -33,6 +29,5 @@
     "java": ">=16"
   },
   "suggests": {
-    "another-mod": "*"
   }
 }

@@ -1,6 +1,6 @@
-package net.fabricmc.example.event;
+package dev.micalobia.breathinglib.event;
 
-import net.fabricmc.example.data.BreathingInfo;
+import dev.micalobia.breathinglib.data.BreathingInfo;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.entity.LivingEntity;
