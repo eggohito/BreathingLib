@@ -13,11 +13,11 @@ import java.util.Optional;
 public interface BreathingCallback {
 	Identifier VANILLA_PHASE = new Identifier("breathinglib:vanilla");
 	/**
-	 * <p>An event to change or modify the behaviour of the breath meter and its effect on the player.
+	 * <p>An event to change or modify the behavior of the breath meter and its effect on the player.
 	 * <ul><li>{@link ActionResult#SUCCESS} fills the air bar
 	 * <li>{@link ActionResult#FAIL} depletes the air bar
 	 * <li>{@link ActionResult#CONSUME} freezes the air bar
-	 * <li>{@link ActionResult#PASS} passes control to the next listener, or vanilla behaviour
+	 * <li>{@link ActionResult#PASS} passes control to the next listener, or vanilla behavior
 	 * </ul>
 	 * Can return {@link TypedActionResult} with {@link Optional#empty()} to use vanilla behavior, or you can occupy the optional with a custom {@link BreathingInfo}
 	 *

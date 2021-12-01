@@ -39,13 +39,13 @@ public abstract class BreathingHook {
 			target = "Lnet/minecraft/entity/LivingEntity;isAlive()Z",
 			ordinal = 1
 	))
-	public boolean BreathingLib$removeOldBreathingBehaviour(LivingEntity instance) {
+	public boolean BreathingLib$removeOldBreathingBehavior(LivingEntity instance) {
 		return false;
 	}
 
 
 	@Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isAlive()Z", ordinal = 2))
-	public void BreathingLib$addNewBreathingBehaviour(CallbackInfo ci) {
+	public void BreathingLib$addNewBreathingBehavior(CallbackInfo ci) {
 		++BreathingLib$tickCounter;
 		BreathingLib$tickCounter &= 65535;
 		if(!this.isAlive()) return;

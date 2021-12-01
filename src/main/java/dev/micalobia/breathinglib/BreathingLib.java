@@ -20,7 +20,7 @@ import java.util.Optional;
 public class BreathingLib implements ModInitializer {
 	public static final Logger LOGGER = LogManager.getLogger("breathinglib");
 
-	static TypedActionResult<Optional<BreathingInfo>> vanillaBreathingBehaviour(LivingEntity entity) {
+	static TypedActionResult<Optional<BreathingInfo>> vanillaBreathingBehavior(LivingEntity entity) {
 		BlockPos pos;
 		if(!entity.world.isClient && !Objects.equal(((LivingEntityAccessor) entity).getLastBlockPos(), pos = entity.getBlockPos())) {
 			((LivingEntityAccessor) entity).setLastBlockPos(pos);
@@ -43,6 +43,6 @@ public class BreathingLib implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		BreathingCallback.EVENT.register(BreathingCallback.VANILLA_PHASE, BreathingLib::vanillaBreathingBehaviour);
+		BreathingCallback.EVENT.register(BreathingCallback.VANILLA_PHASE, BreathingLib::vanillaBreathingBehavior);
 	}
 }
