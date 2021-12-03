@@ -1,12 +1,18 @@
 package dev.micalobia.breathinglib.mixin;
 
+import com.google.common.base.Objects;
 import dev.micalobia.breathinglib.data.BreathingInfo;
 import dev.micalobia.breathinglib.event.BreathingCallback;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,10 +24,14 @@ import java.util.Optional;
 import java.util.Random;
 
 @Mixin(LivingEntity.class)
-public abstract class BreathingHook {
+public abstract class BreathingHook extends Entity {
 	private int BreathingLib$tickCounter = 0;
 
-	public LivingEntity self() {
+	public BreathingHook(EntityType<?> type, World world) {
+		super(type, world);
+	}
+
+	private LivingEntity self() {
 		return (LivingEntity) (Object) this;
 	}
 
@@ -49,30 +59,39 @@ public abstract class BreathingHook {
 		++BreathingLib$tickCounter;
 		BreathingLib$tickCounter &= 65535;
 		if(!this.isAlive()) return;
+		BlockPos pos;
+		if(!this.world.isClient) {
+			if(!Objects.equal(((LivingEntityAccessor) this).getLastBlockPos(), pos = this.getBlockPos())) {
+				((LivingEntityAccessor) this).setLastBlockPos(pos);
+				((LivingEntityAccessor) this).callApplyMovementEffects(pos);
+			}
+			if(this.isSubmergedIn(FluidTags.WATER) && this.hasVehicle() && this.getVehicle() != null && !this.getVehicle().canBeRiddenInWater())
+				this.stopRiding();
+		}
 		TypedActionResult<Optional<BreathingInfo>> result = BreathingCallback.EVENT.invoker().apply(self());
 		BreathingInfo info;
 		switch(result.getResult()) {
 			case CONSUME, CONSUME_PARTIAL:
 				return;
 			case SUCCESS, PASS:
-				info = result.getValue().orElse(BreathingInfo.gainingAir().build());
+				info = result.getValue().orElseGet(() -> BreathingInfo.gainingAir().build());
 				if(BreathingLib$tickCounter % info.airDelta() == 0)
 					BreathingLib$addAir(info.airPerCycle());
 				return;
 			case FAIL:
-				info = result.getValue().orElse(BreathingInfo.losingAir().build());
+				info = result.getValue().orElseGet(() -> BreathingInfo.losingAir().build());
 				if(BreathingLib$tickCounter % info.airDelta() == 0)
 					BreathingLib$removeAir(info.airPerCycle(), info.ignoreRespiration());
-				if(self().getAir() <= -info.damageAt()) {
-					self().setAir(0);
+				if(this.getAir() <= -info.damageAt()) {
+					this.setAir(0);
 					if(info.particleEffect() != null) {
 						if(this.damage(info.damageSource(), info.damagePerCycle())) {
-							Vec3d vel = self().getVelocity();
+							Vec3d vel = this.getVelocity();
 							for(int i = 0; i < 8; ++i) {
 								double x = this.getRandom().nextDouble() - this.getRandom().nextDouble();
 								double y = this.getRandom().nextDouble() - this.getRandom().nextDouble();
 								double z = this.getRandom().nextDouble() - this.getRandom().nextDouble();
-								self().world.addParticle(info.particleEffect(), self().getX() + x, self().getY() + y, self().getZ() + z, vel.x, vel.y, vel.z);
+								this.world.addParticle(info.particleEffect(), this.getX() + x, this.getY() + y, this.getZ() + z, vel.x, vel.y, vel.z);
 							}
 						}
 					}
@@ -81,13 +100,13 @@ public abstract class BreathingHook {
 	}
 
 	private void BreathingLib$removeAir(int remove, boolean ignoreRespiration) {
-		int air = self().getAir();
-		if(ignoreRespiration) self().setAir(air - remove);
+		int air = this.getAir();
+		if(ignoreRespiration) this.setAir(air - remove);
 		int i = EnchantmentHelper.getRespiration(self());
-		if(i <= 0 || this.getRandom().nextInt(i + 1) <= 0) self().setAir(air - remove);
+		if(i <= 0 || this.getRandom().nextInt(i + 1) <= 0) this.setAir(air - remove);
 	}
 
 	private void BreathingLib$addAir(int add) {
-		self().setAir(Math.min(self().getAir() + add, self().getMaxAir()));
+		this.setAir(Math.min(this.getAir() + add, this.getMaxAir()));
 	}
 }
