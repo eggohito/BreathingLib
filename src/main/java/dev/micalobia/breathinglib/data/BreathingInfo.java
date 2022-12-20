@@ -45,7 +45,7 @@ public record BreathingInfo(int airPerCycle, int airDelta, float damagePerCycle,
 		private @Nullable
 		ParticleEffect particleEffect;
 
-		protected Builder() {
+		public Builder() {
 			this.airPerCycle = 1;
 			this.airDelta = 1;
 			this.damagePerCycle = 2f;

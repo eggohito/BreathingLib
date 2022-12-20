@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Optional;
 
 public class BreathingLib implements ModInitializer {
+
 	public static final Logger LOGGER = LogManager.getLogger("breathinglib");
 
 	/**
@@ -27,17 +28,24 @@ public class BreathingLib implements ModInitializer {
 	 * </ul>
 	 */
 	public static ActionResult vanillaBreathing(LivingEntity entity) {
-		if(!entity.isSubmergedIn(FluidTags.WATER))
+
+		if (!entity.isSubmergedIn(FluidTags.WATER))
 			return ActionResult.SUCCESS;
-		if(entity.world.getBlockState(new BlockPos(entity.getX(), entity.getEyeY(), entity.getZ())).isOf(Blocks.BUBBLE_COLUMN))
+
+		if (entity.world.getBlockState(new BlockPos(entity.getX(), entity.getEyeY(), entity.getZ())).isOf(Blocks.BUBBLE_COLUMN))
 			return ActionResult.SUCCESS;
-		if(entity.canBreatheInWater())
+
+		if (entity.canBreatheInWater())
 			return ActionResult.CONSUME;
-		if(StatusEffectUtil.hasWaterBreathing(entity))
+
+		if (StatusEffectUtil.hasWaterBreathing(entity))
 			return ActionResult.CONSUME;
-		if(entity instanceof PlayerEntity player && player.getAbilities().invulnerable)
+
+		if (entity instanceof PlayerEntity player && player.getAbilities().invulnerable)
 			return ActionResult.CONSUME;
+
 		return ActionResult.FAIL;
+
 	}
 
 	/**
@@ -49,11 +57,17 @@ public class BreathingLib implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		BreathingCallback.EVENT.register(BreathingCallback.VANILLA_PHASE, entity -> switch(vanillaBreathing(entity)) {
-			case SUCCESS -> TypedActionResult.success(Optional.empty());
-			case CONSUME, CONSUME_PARTIAL -> TypedActionResult.consume(Optional.empty());
-			case FAIL -> TypedActionResult.fail(Optional.empty());
-			case PASS -> TypedActionResult.pass(Optional.empty());
-		});
+
+        BreathingCallback.EVENT.register(
+            BreathingCallback.VANILLA_PHASE,
+            livingEntity -> switch (vanillaBreathing(livingEntity)) {
+                case SUCCESS -> TypedActionResult.success(Optional.empty());
+                case CONSUME, CONSUME_PARTIAL -> TypedActionResult.consume(Optional.empty());
+                case PASS -> TypedActionResult.pass(Optional.empty());
+                case FAIL -> TypedActionResult.fail(Optional.empty());
+            }
+        );
+
 	}
+
 }
