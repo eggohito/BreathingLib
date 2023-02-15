@@ -9,13 +9,16 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.tag.FluidTags;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,10 +54,15 @@ public abstract class BreathingHook extends Entity {
 
 	@Shadow public abstract void stopRiding();
 
-	@Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isAlive()Z", ordinal = 0))
-	public boolean BreathingLib$removeOldBreathingBehavior(LivingEntity instance) {
-		return false;
-	}
+	@Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isSubmergedIn(Lnet/minecraft/tag/TagKey;)Z"))
+    public boolean BreathingLib$removeOldDrowningBehavior(LivingEntity instance, TagKey<Fluid> tagKey) {
+        return false;
+    }
+
+    @Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getAir()I", ordinal = 2))
+    public int BreathingLib$removeOldBreathingBehavior(LivingEntity instance) {
+        return instance.getMaxAir();
+    }
 
 	@Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isAlive()Z", ordinal = 1))
 	public void BreathingLib$addNewBreathingBehavior(CallbackInfo ci) {
@@ -63,16 +71,6 @@ public abstract class BreathingHook extends Entity {
 		BreathingLib$tickCounter &= 65535;
 
 		if(!this.isAlive()) return;
-
-		//	Re-implement vanilla's suffocation behavior
-		if (this.isInsideWall()) this.damage(DamageSource.IN_WALL, 1.0F);
-		else if (self() instanceof PlayerEntity playerEntity && playerEntity.world.getWorldBorder().contains(playerEntity.getBoundingBox())) {
-			double d = playerEntity.world.getWorldBorder().getDistanceInsideBorder(playerEntity) + playerEntity.world.getWorldBorder().getSafeZone();
-			if (d < 0.0) {
-				double e = playerEntity.world.getWorldBorder().getDamagePerBlock();
-				if (e > 0.0) this.damage(DamageSource.IN_WALL, Math.max(1, MathHelper.floor(-d * e)));
-			}
-		}
 
 		//	Implement a new breathing behavior
 		TypedActionResult<Optional<BreathingInfo>> result = BreathingCallback.EVENT.invoker().apply(self());
@@ -111,12 +109,6 @@ public abstract class BreathingHook extends Entity {
 
 		if (this.world.isClient) return;
 		if (this.isSubmergedIn(FluidTags.WATER) && this.hasVehicle() && this.getVehicle() != null && !this.getVehicle().canBeRiddenInWater()) this.stopRiding();
-
-		BlockPos blockPos = this.getBlockPos();
-		if (Objects.equal(((LivingEntityAccessor) this).getLastBlockPos(), blockPos)) return;
-
-		((LivingEntityAccessor) this).setLastBlockPos(blockPos);
-		((LivingEntityAccessor) this).callApplyMovementEffects(blockPos);
 
 	}
 
