@@ -1,6 +1,5 @@
 package dev.micalobia.breathinglib.mixin;
 
-import com.google.common.base.Objects;
 import dev.micalobia.breathinglib.data.BreathingInfo;
 import dev.micalobia.breathinglib.event.BreathingCallback;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -8,11 +7,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tag.FluidTags;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
@@ -51,28 +49,25 @@ public abstract class BreathingHook extends Entity {
 
 	@Shadow public abstract void stopRiding();
 
-	@Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isAlive()Z", ordinal = 0))
-	public boolean BreathingLib$removeOldBreathingBehavior(LivingEntity instance) {
+	@Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isSubmergedIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
+	public boolean BreathingLib$removeOldDrowningBehavior(LivingEntity instance, TagKey<Fluid> tagKey) {
 		return false;
+	}
+
+	@Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getAir()I", ordinal = 2))
+	public int BreathingLib$removeOldBreathingBehavior(LivingEntity instance) {
+		return instance.getMaxAir();
 	}
 
 	@Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isAlive()Z", ordinal = 1))
 	public void BreathingLib$addNewBreathingBehavior(CallbackInfo ci) {
 
+		if(!this.isAlive()) {
+			return;
+		}
+
 		++BreathingLib$tickCounter;
 		BreathingLib$tickCounter &= 65535;
-
-		if(!this.isAlive()) return;
-
-		//	Re-implement vanilla's suffocation behavior
-		if (this.isInsideWall()) this.damage(DamageSource.IN_WALL, 1.0F);
-		else if (self() instanceof PlayerEntity playerEntity && playerEntity.world.getWorldBorder().contains(playerEntity.getBoundingBox())) {
-			double d = playerEntity.world.getWorldBorder().getDistanceInsideBorder(playerEntity) + playerEntity.world.getWorldBorder().getSafeZone();
-			if (d < 0.0) {
-				double e = playerEntity.world.getWorldBorder().getDamagePerBlock();
-				if (e > 0.0) this.damage(DamageSource.IN_WALL, Math.max(1, MathHelper.floor(-d * e)));
-			}
-		}
 
 		//	Implement a new breathing behavior
 		TypedActionResult<Optional<BreathingInfo>> result = BreathingCallback.EVENT.invoker().apply(self());
@@ -81,18 +76,26 @@ public abstract class BreathingHook extends Entity {
             case CONSUME, CONSUME_PARTIAL -> {}
             case SUCCESS, PASS -> {
                 info = result.getValue().orElseGet(() -> BreathingInfo.gainingAir().build());
-                if (BreathingLib$tickCounter % info.airDelta() == 0) BreathingLib$addAir(info.airPerCycle());
+                if (BreathingLib$tickCounter % info.airDelta() == 0) {
+	                BreathingLib$addAir(info.airPerCycle());
+                }
             }
             case FAIL -> {
 
                 info = result.getValue().orElseGet(() -> BreathingInfo.losingAir().build());
-                if (BreathingLib$tickCounter % info.airDelta() == 0) BreathingLib$removeAir(info.airPerCycle(), info.ignoreRespiration());
+                if (BreathingLib$tickCounter % info.airDelta() == 0) {
+	                BreathingLib$removeAir(info.airPerCycle(), info.ignoreRespiration());
+                }
 
-				if (this.getAir() > -info.damageAt()) break;
+				if (this.getAir() > -info.damageAt()) {
+					break;
+				}
+
 				this.setAir(0);
-
-				if (!this.damage(info.damageSource(), info.damagePerCycle())) break;
-				if (info.particleEffect() == null) break;
+				DamageSource source = info.damageSource() != null ? info.damageSource() : this.getDamageSources().drown();
+				if (!this.damage(source, info.damagePerCycle()) || info.particleEffect() == null) {
+					break;
+				}
 
 				Vec3d velocity = this.getVelocity();
 				for (int i = 0; i < 8; i++) {
@@ -109,24 +112,23 @@ public abstract class BreathingHook extends Entity {
 
         }
 
-		if (this.world.isClient) return;
-		if (this.isSubmergedIn(FluidTags.WATER) && this.hasVehicle() && this.getVehicle() != null && !this.getVehicle().canBeRiddenInWater()) this.stopRiding();
-
-		BlockPos blockPos = this.getBlockPos();
-		if (Objects.equal(((LivingEntityAccessor) this).getLastBlockPos(), blockPos)) return;
-
-		((LivingEntityAccessor) this).setLastBlockPos(blockPos);
-		((LivingEntityAccessor) this).callApplyMovementEffects(blockPos);
+		if (!world.isClient && this.isSubmergedIn(FluidTags.WATER) && this.hasVehicle() && this.getVehicle() != null && !this.getVehicle().shouldDismountUnderwater()) {
+			this.stopRiding();
+		}
 
 	}
 
 	private void BreathingLib$removeAir(int remove, boolean ignoreRespiration) {
 
 		int air = this.getAir();
-		if (ignoreRespiration) this.setAir(air - remove);
+		if (ignoreRespiration) {
+			this.setAir(air - remove);
+		}
 
 		int respirationLvl = EnchantmentHelper.getRespiration(self());
-		if (respirationLvl <= 0 || this.getRandom().nextInt(respirationLvl + 1) <= 0) this.setAir(air - remove);
+		if (respirationLvl <= 0 || this.getRandom().nextInt(respirationLvl + 1) <= 0) {
+			this.setAir(air - remove);
+		}
 
 	}
 

@@ -8,14 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Information on how {@link dev.micalobia.breathinglib.event.BreathingCallback#EVENT} handles the specifics of losing or gaining air.<br>
- * You shouldn't have to instantiate this directly, instead using {@link BreathingInfo#losingAir()} and {@link BreathingInfo#gainingAir()}
- *
+ * Information on how {@link dev.micalobia.breathinglib.event.BreathingCallback#EVENT} handles the specifics of losing or gaining air.
  * @see Builder
  */
 public record BreathingInfo(int airPerCycle, int airDelta, float damagePerCycle, int damageAt,
-							boolean ignoreRespiration, DamageSource damageSource,
-							@Nullable ParticleEffect particleEffect) {
+                            boolean ignoreRespiration, @Nullable DamageSource damageSource,
+                            @Nullable ParticleEffect particleEffect) {
 
 	/**
 	 * @return A builder with vanilla values for losing air
@@ -41,9 +39,10 @@ public record BreathingInfo(int airPerCycle, int airDelta, float damagePerCycle,
 		private float damagePerCycle;
 		private int damageAt;
 		private boolean ignoreRespiration;
+		@Nullable
 		private DamageSource damageSource;
-		private @Nullable
-		ParticleEffect particleEffect;
+		@Nullable
+		private ParticleEffect particleEffect;
 
 		public Builder() {
 			this.airPerCycle = 1;
@@ -51,7 +50,6 @@ public record BreathingInfo(int airPerCycle, int airDelta, float damagePerCycle,
 			this.damagePerCycle = 2f;
 			this.damageAt = 20;
 			this.ignoreRespiration = false;
-			this.damageSource = DamageSource.DROWN;
 			this.particleEffect = ParticleTypes.BUBBLE;
 		}
 
@@ -107,10 +105,9 @@ public record BreathingInfo(int airPerCycle, int airDelta, float damagePerCycle,
 
 		/**
 		 * Sets the {@link DamageSource} for the type of damage induced every damage cycle.
-		 * Defaults to {@link DamageSource#DROWN}.
 		 */
 		@Contract("_ -> this")
-		public Builder damageSource(@NotNull DamageSource damageSource) {
+		public Builder damageSource(@Nullable DamageSource damageSource) {
 			this.damageSource = damageSource;
 			return this;
 		}

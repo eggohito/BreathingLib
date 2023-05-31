@@ -6,7 +6,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tag.FluidTags;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -32,7 +32,7 @@ public class BreathingLib implements ModInitializer {
 		if (!entity.isSubmergedIn(FluidTags.WATER))
 			return ActionResult.SUCCESS;
 
-		if (entity.world.getBlockState(new BlockPos(entity.getX(), entity.getEyeY(), entity.getZ())).isOf(Blocks.BUBBLE_COLUMN))
+		if (entity.world.getBlockState(BlockPos.ofFloored(entity.getX(), entity.getEyeY(), entity.getZ())).isOf(Blocks.BUBBLE_COLUMN))
 			return ActionResult.SUCCESS;
 
 		if (entity.canBreatheInWater())
@@ -49,7 +49,7 @@ public class BreathingLib implements ModInitializer {
 	}
 
 	/**
-	 * Equivelent to {@link BreathingCallback#EVENT}<code>.register(event)</code>
+	 * Equivalent to {@link BreathingCallback#EVENT}<code>.register(event)</code>
 	 */
 	public static void register(BreathingCallback event) {
 		BreathingCallback.EVENT.register(event);
