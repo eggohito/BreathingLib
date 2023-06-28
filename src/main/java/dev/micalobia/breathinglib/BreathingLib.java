@@ -32,7 +32,7 @@ public class BreathingLib implements ModInitializer {
 		if (!entity.isSubmergedIn(FluidTags.WATER))
 			return ActionResult.SUCCESS;
 
-		if (entity.world.getBlockState(BlockPos.ofFloored(entity.getX(), entity.getEyeY(), entity.getZ())).isOf(Blocks.BUBBLE_COLUMN))
+		if (entity.getWorld().getBlockState(BlockPos.ofFloored(entity.getX(), entity.getEyeY(), entity.getZ())).isOf(Blocks.BUBBLE_COLUMN))
 			return ActionResult.SUCCESS;
 
 		if (entity.canBreatheInWater())

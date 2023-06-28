@@ -104,7 +104,7 @@ public abstract class BreathingHook extends Entity {
 					double y = this.getRandom().nextDouble() - this.getRandom().nextDouble();
 					double z = this.getRandom().nextDouble() - this.getRandom().nextDouble();
 
-					this.world.addParticle(info.particleEffect(), this.getX() + x, this.getY() + y, this.getZ() + z, velocity.x, velocity.y, velocity.z);
+					this.getWorld().addParticle(info.particleEffect(), this.getX() + x, this.getY() + y, this.getZ() + z, velocity.x, velocity.y, velocity.z);
 
 				}
 
@@ -112,7 +112,7 @@ public abstract class BreathingHook extends Entity {
 
         }
 
-		if (!world.isClient && this.isSubmergedIn(FluidTags.WATER) && this.hasVehicle() && this.getVehicle() != null && !this.getVehicle().shouldDismountUnderwater()) {
+		if (!getWorld().isClient && this.isSubmergedIn(FluidTags.WATER) && this.hasVehicle() && this.getVehicle() != null && !this.getVehicle().shouldDismountUnderwater()) {
 			this.stopRiding();
 		}
 
